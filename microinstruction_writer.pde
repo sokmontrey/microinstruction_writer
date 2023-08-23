@@ -166,34 +166,36 @@ void decodeAddrHelper(String[] addr, int index, String[] d1, String[] d2, String
   }
 }
 
-
-String instructions[][] = {
-  {"000000000000", "00000000", "00000000", "00000000"},
-};
+String[] instr(String flg, String step, String inst_code, String... args){
+  HashMap<String, Integer> dict = new HashMap<String, Integer>();
+  
+  dict.put("ADDR_REG_WE", 0);
+  dict.put("RAM_OE", 1);
+  dict.put("PROG_CNTR_OE", 2);
+  dict.put("PROG_CNTR_INCR", 3);
+  dict.put("INST_REG_WE", 4);
+  dict.put("STEP_CLR", 5);
+  //dict.put("", );
+  
+  String d1[] = {"0", "0", "0", "0", "0", "0", "0", "0"};
+  String d2[] = {"0", "0", "0", "0", "0", "0", "0", "0"};
+  String d3[] = {"0", "0", "0", "0", "0", "0", "0", "0"};
+  
+  for(String arg: args){
+    int index = dict.get(arg);
+    if(index < 8){
+      d1[index - 0] = "1";
+    }else if(index < 16){
+      d2[index - 8] = "1";
+    }else if(index < 24){
+      d3[index - 16] = "1";
+    }
+  }
+  String result[] = {flg + step + inst_code, String.join("", d1), String.join("", d2), String.join("", d3) };
+  return result;
+}
 
 void start(){
-  
-  for(int i=0; i<8; i++){
-    String[] s1 = instructions[i][0].split("");
-    String[] s2 = instructions[i][3].split("");
-    
-    s1[i] = "1";
-    s2[i] = "1";
-    
-    instructions[i][0] = String.join("", s1);
-    instructions[i][3] = String.join("", s2);
-  }
-  for(int i=0; i<4; i++){
-    String[] s1 = instructions[i+8][0].split("");
-    String[] s2 = instructions[i+8][3].split("");
-    
-    s1[i+8] = "1";
-    s2[i] = "1";
-    
-    instructions[i+8][0] = String.join("", s1);
-    instructions[i+8][3] = String.join("", s2);
-  }
-  
   mit = new MicroInstructionWriter(new Arduino(this, Arduino.list()[0], 57600));
   println("Wait 3s");
   delay(1000);
@@ -202,9 +204,19 @@ void start(){
   println("Wait 1s");
   delay(1000);
   
-  //read(instructions, 3);
-  //write(instructions, 3);
   //mit.test();
+
+  String instructions[][] = {
+    instr("0000", "0000", "0000", "PROG_CNTR_OE", "ADDR_REG_WE"),
+    instr("0000", "0000", "0001", "RAM_OE", "INST_REG_WE"),
+    instr("0000", "0000", "0010", "STEP_CLR", "PROG_CNTR_INCR"),
+    //instr("0000", "0000", "0000",),
+  };
+  
+  int rom_index = 1;
+  
+  read(instructions, rom_index);
+  //write(instructions, rom_index);
 }
 
 void draw(){
