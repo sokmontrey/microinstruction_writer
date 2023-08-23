@@ -168,10 +168,32 @@ void decodeAddrHelper(String[] addr, int index, String[] d1, String[] d2, String
 
 
 String instructions[][] = {
-{"00000000XXXX", "00000000", "00000000", "01010101"},
+  {"000000000000", "00000000", "00000000", "00000000"},
 };
 
 void start(){
+  
+  for(int i=0; i<8; i++){
+    String[] s1 = instructions[i][0].split("");
+    String[] s2 = instructions[i][3].split("");
+    
+    s1[i] = "1";
+    s2[i] = "1";
+    
+    instructions[i][0] = String.join("", s1);
+    instructions[i][3] = String.join("", s2);
+  }
+  for(int i=0; i<4; i++){
+    String[] s1 = instructions[i+8][0].split("");
+    String[] s2 = instructions[i+8][3].split("");
+    
+    s1[i+8] = "1";
+    s2[i] = "1";
+    
+    instructions[i+8][0] = String.join("", s1);
+    instructions[i+8][3] = String.join("", s2);
+  }
+  
   mit = new MicroInstructionWriter(new Arduino(this, Arduino.list()[0], 57600));
   println("Wait 3s");
   delay(1000);
@@ -180,7 +202,7 @@ void start(){
   println("Wait 1s");
   delay(1000);
   
-  read(instructions, 3);
+  //read(instructions, 3);
   //write(instructions, 3);
   //mit.test();
 }
